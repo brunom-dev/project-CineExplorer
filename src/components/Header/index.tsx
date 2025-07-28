@@ -82,7 +82,7 @@ export const Header = () => {
     };
 
     const handleSearch = (value: boolean) => {
-        setTimeout(() => setSearchFocus(value), 100);
+        setTimeout(() => setSearchFocus(value), 500);
     };
 
     const handleLogout = async () => {
