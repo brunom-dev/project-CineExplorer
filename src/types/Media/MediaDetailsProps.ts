@@ -30,3 +30,23 @@ export type MediaDetailsProps = {
     vote_average: number;
     tagline: string;
 };
+
+export type WatchProvider = {
+    provider_id: number;
+    provider_name: string;
+    logo_path: string;
+}
+
+export type WatchProviderCountryResults = {
+  link: string;
+  flatrate?: WatchProvider[]; // Assinatura
+  rent?: WatchProvider[];     // Alugar
+  buy?: WatchProvider[];      // Comprar
+};
+
+export type WatchProviderResponse = {
+  id: number;
+  results: {
+    [countryCode: string]: WatchProviderCountryResults;
+  };
+};

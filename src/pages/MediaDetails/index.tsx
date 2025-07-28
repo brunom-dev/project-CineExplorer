@@ -9,6 +9,7 @@ import type {
     MediaDetailsProps,
     Genre,
     Credits,
+    WatchProviderResponse,
 } from "../../types/Media/MediaDetailsProps.ts";
 
 import { MediaCard } from "../../components/MediaCard/index";
@@ -21,11 +22,13 @@ import {
     findBestTrailer,
     getMediaCredits,
     getMediaRecommendations,
+    getMediaWatchProviders,
 } from "../../services/tmdb/tmdb.ts";
 import { SkeletonCard } from "../../components/SkeletonCard";
 import { AlertTriangleIcon } from "lucide-react";
 import { Spinner } from "../../components/Spinner";
 import { FavoriteButton } from "../../components/FavoriteButton/index.tsx";
+import { WatchProviders } from "../../components/WatchProviders/index.tsx";
 
 export function MediaDetailsPage() {
     const location = useLocation();
@@ -35,6 +38,8 @@ export function MediaDetailsPage() {
 
     const [details, setDetails] = useState<MediaDetailsProps | null>(null);
     const [credits, setCredits] = useState<Credits | null>(null);
+    const [watchProviders, setWatchProviders] =
+        useState<WatchProviderResponse | null>(null);
     const [recommendations, setRecommendations] = useState<MediaItemProps[]>(
         []
     );
@@ -51,28 +56,31 @@ export function MediaDetailsPage() {
                 setTrailerKey(null);
                 setCredits(null);
                 setIsLoading(true);
+                setWatchProviders(null);
 
                 const [
                     detailsResponse,
                     videosResponse,
                     creditsResponse,
                     recommendationsResponse,
+                    watchProvidersResponse,
                 ] = await Promise.all([
                     getMediaDetails(movieId, mediaType),
                     getMediaTrailer(movieId, mediaType),
                     getMediaCredits(movieId, mediaType),
                     getMediaRecommendations(movieId, mediaType),
+                    getMediaWatchProviders(mediaType, movieId),
                 ]);
 
                 setDetails(detailsResponse);
                 setCredits(creditsResponse);
                 setRecommendations(recommendationsResponse);
+                setWatchProviders(watchProvidersResponse);
 
                 const bestTrailer = findBestTrailer(videosResponse, mediaType);
                 if (bestTrailer) {
                     setTrailerKey(bestTrailer.key);
                 }
-
                 setIsLoading(false);
             }
         };
@@ -186,7 +194,7 @@ export function MediaDetailsPage() {
 
     return (
         <div className="min-h-[90vh] text-white">
-            <section className="relative w-full pt-20">
+            <section className="relative w-full pt-20 flex justify-center">
                 <div
                     className="absolute inset-0 bg-cover bg-center opacity-40"
                     style={{ backgroundImage: `url(${backdropUrl})` }}
@@ -194,8 +202,8 @@ export function MediaDetailsPage() {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/50"></div>
 
-                <div className="container md:px-10 px-20 py-24 relative z-10 flex flex-col md:flex-row items-center gap-10">
-                    <figure className="w-full md:w-1/4 flex-shrink-0">
+                <div className="container md:px-10 px-20 py-24 relative z-10 flex flex-col md:flex-row gap-10">
+                    <figure className="w-full md:w-1/4">
                         <img
                             src={posterUrl}
                             alt={`Pôster de ${details.title}`}
@@ -205,18 +213,22 @@ export function MediaDetailsPage() {
                     </figure>
 
                     <div className="w-full md:w-2/3 text-center md:text-left text-slate-100">
-                        <div className="flex gap-3 items-center">
-                            <h1 className="text-4xl lg:text-5xl font-bold relative">
+                        <div className="flex gap-3 items-center relative md:justify-start justify-center">
+                            <h1 className="text-4xl lg:text-5xl font-bold  mt-5 relative text-center">
                                 {mediaType === "movie"
                                     ? details.title
                                     : details.name}{" "}
                                 ({year})
+
                             </h1>
 
-                            <FavoriteButton
-                                mediaItem={mediaItem}
-                                absoluteProp={false}
-                            />
+                            <div className="mt-5">
+                                <FavoriteButton
+                                    mediaItem={mediaItem}
+                                    absoluteProp={false}
+                                 />
+                            </div>
+
                         </div>
 
                         {details.tagline && (
@@ -261,7 +273,7 @@ export function MediaDetailsPage() {
                             </p>
                         </div>
 
-                        <div className="mt-8">
+                        <div className="mt-4">
                             <button
                                 className="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg disabled:bg-slate-700 disabled:cursor-not-allowed cursor-pointer"
                                 onClick={() => setIsModalOpen(true)}
@@ -273,6 +285,8 @@ export function MediaDetailsPage() {
                                     : "Trailer Indisponível"}
                             </button>
                         </div>
+
+                        <WatchProviders providers={watchProviders} />
                     </div>
                 </div>
             </section>

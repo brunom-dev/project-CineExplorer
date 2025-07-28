@@ -4,6 +4,7 @@ import type { MediaItemProps } from "../../types/Media/MediaItemProps";
 import type { MediaDetailsProps } from "../../types/Media/MediaDetailsProps";
 import type { Credits } from "../../types/Media/MediaDetailsProps";
 import type { VideoProps } from "../../types/Media/VideoProps";
+import type { WatchProviderResponse } from "../../types/Media/MediaDetailsProps";
 
 export const getTrendingMovies = async (): Promise<MediaItemProps[]> => {
     try {
@@ -135,17 +136,35 @@ export const getMediaRecommendations = async (
     }
 };
 
-export const getMediaSearch = async (searchText: string): Promise<MediaItemProps[]> => {
+export const getMediaSearch = async (
+    searchText: string
+): Promise<MediaItemProps[]> => {
     try {
-        const response = await api.get(`/search/multi`, {params: {query: searchText}});
+        const response = await api.get(`/search/multi`, {
+            params: { query: searchText },
+        });
 
         return response.data.results.filter(
-            (item: MediaItemProps) => (item.media_type === 'movie' || item.media_type === 'tv') && item.poster_path
+            (item: MediaItemProps) =>
+                (item.media_type === "movie" || item.media_type === "tv") &&
+                item.poster_path
         );
-    }
-
-    catch (error) {
+    } catch (error) {
         console.error("Erro ao fazer busca:", error);
         return [];
     }
-}
+};
+
+export const getMediaWatchProviders = async (
+    mediaType: string,
+    mediaId: number
+): Promise<WatchProviderResponse | null> => {
+    try {
+        const response = await api.get(
+            `/${mediaType}/${mediaId}/watch/providers`
+        );
+        return response.data;
+    } catch (error) {
+        return null;
+    }
+};
